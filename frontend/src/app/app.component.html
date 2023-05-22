@@ -1,0 +1,12 @@
+<div class="container">
+  <div class="message-list">
+    <ng-container *ngFor="let entry of (data$ | async)">
+      <p [class]="'from-' + (entry.nickname === nickname ? 'me' : 'them')" >
+        <span>{{ entry.nickname }}</span><br>
+        {{ entry.message }}
+      </p>
+    </ng-container>
+
+    <input type="text" style="margin-top: 50px;">
+  </div>
+</div>
