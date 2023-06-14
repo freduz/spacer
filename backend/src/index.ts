@@ -50,6 +50,17 @@ app.get('/messages', (_: express.Request, response: express.Response) => {
  */
 app.post(
   '/messages',
+  [
+    // Validate the 'message' field
+    body('message').notEmpty().withMessage('Message is required'),
+
+    // Validate the 'nickname' field
+    body('nickname')
+      .notEmpty()
+      .withMessage('Nickname is required')
+      .isLength({ max: 50 })
+      .withMessage('Nickname cannot exceed 50 characters'),
+  ],
   (request: express.Request, response: express.Response) => {
     if (typeof request.headers['x-api-key'] !== 'string') {
       return response.sendStatus(403);
