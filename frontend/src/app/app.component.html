@@ -7,7 +7,7 @@
         {{ entry.message }}
         <span
           class="block"
-          [ngStyle]="{ 'font-size': '10px' }"
+          [ngStyle]="{ 'font-size': '10px', 'text-align': 'right' }"
           *ngIf="entry.nickname === nickname"
         >
           {{ entry.sentAt | date : "dd.MM.yy HH:mm" }}
