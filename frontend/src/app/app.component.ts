@@ -1,5 +1,11 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { Observable, Subscription, of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AlienService } from './services/alien.service';
 import { ToastrService } from 'ngx-toastr';
@@ -9,8 +15,9 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   nickname: string;
+  subscrption!: Subscription;
 
   data$!: Observable<any>;
   @ViewChild('chatInput') chatInput!: ElementRef;
@@ -29,7 +36,7 @@ export class AppComponent implements OnInit {
   handleMessage(event: any) {
     const message = event.target.value;
     const payload = { nickname: this.nickname, message };
-    this.alienService.sendData(payload).subscribe({
+    this.subscrption = this.alienService.sendData(payload).subscribe({
       next: (res) => {
         this.data$ = of(res);
         this.chatInput.nativeElement.value = '';
@@ -38,5 +45,9 @@ export class AppComponent implements OnInit {
         this.toaster.error('Internal server error');
       },
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscrption.unsubscribe();
   }
 }
