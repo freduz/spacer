@@ -4,6 +4,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { createHmac } from 'crypto';
+const { body, validationResult } = require('express-validator');
 
 import environment from '../environment/environment.json';
 
@@ -34,6 +35,11 @@ function loadDataBase() {
  */
 app.get('/messages', (_: express.Request, response: express.Response) => {
   // ... YOUR IMPLEMENTATION ...
+  response.json({
+    status: 'success',
+    messages: DATABASE,
+    count: DATABASE.length,
+  });
 });
 
 /**
@@ -54,13 +60,26 @@ app.post(
       .update(request.headers['x-api-key'])
       .digest('hex');
 
-    if (apiKeyHashed !== environment.API_KEY) {
+    const hashedKey = createHmac('md5', environment.SECRET_KEY)
+      .update(environment.API_KEY)
+      .digest('hex');
+
+    if (apiKeyHashed !== hashedKey) {
       return response.sendStatus(403);
     }
+    const errors = validationResult(request);
+    if (!errors.isEmpty()) {
+      // If there are validation errors, send a response with the errors
+      return response.status(400).json({ errors: errors.array() });
+    }
+    const { nickname, message } = request.body;
+    DATABASE.push({ nickname, message, sentAt: new Date().getTime() });
 
     // ... YOUR IMPLEMENTATION ...
 
-    response.sendStatus(201);
+    response.status(201).json({
+      message: DATABASE[DATABASE.length - 1],
+    });
   }
 );
 
@@ -70,7 +89,6 @@ const port = process.env.PORT || 1337;
 
 app.listen(port, () => {
   loadDataBase();
-  console.log(DATABASE);
 });
 
 console.log(`Running on port ${port}`);
